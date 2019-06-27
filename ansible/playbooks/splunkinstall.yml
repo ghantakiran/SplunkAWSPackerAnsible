@@ -1,0 +1,11 @@
+---
+# This playbook deploys all sub playbooks
+
+- name: apply common configuration to all nodes
+  hosts: localhost
+  connection: local
+  sudo: yes
+  #user: root
+
+  roles:
+    - splunkinstall

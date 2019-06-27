@@ -1,0 +1,55 @@
+---
+# This playbook install the apps required in a server
+
+- name: checking if splunk is install
+  tags: install
+  stat: path=/opt/splunk
+  register: splunk_path
+#  become: true
+#  become_user: root
+
+- name: is splunk installed?
+  tags: install
+  debug: msg='splunk is already installed under /opt/splunk'
+  when: splunk_path.stat.exists
+
+- name: download {{splunk_binary}}
+  tags:
+   - install
+  get_url: url={{wget_url}} dest=/tmp/{{splunk_binary}} mode=777
+  when: splunk_path.stat.exists == false
+  #become: true
+  #become_user: root
+  become_method: sudo
+
+
+- name: install splunk binary
+  tags:
+   - install
+  unarchive: src=/tmp/{{splunk_binary}} dest=/opt/ owner=splunk group=splunk creates=yes remote_src=yes
+  become: yes
+  become_method: sudo
+  when: splunk_path.stat.exists == false
+
+- name: accept license and start splunk
+  tags:
+   - install
+  shell: /opt/splunk/bin/splunk start --accept-license --answer-yes --no-prompt --seed-passwd H3ll0w0rld
+  become: yes
+  become_user: splunk
+  when: splunk_path.stat.exists == false
+
+- name: enable boot-start
+  tags:
+   - install
+  shell: /opt/splunk/bin/splunk enable boot-start -systemd-managed 0 -user splunk
+  when: splunk_path.stat.exists == false
+  #become: yes
+  become_method: sudo
+
+- name: make /etc/init.d/splunk executable
+  tags:
+   - install
+  file: path=/etc/init.d/splunk mode=a+x
+  become: true
+  become_user: root

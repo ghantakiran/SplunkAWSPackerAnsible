@@ -1,0 +1,10 @@
+---
+# playbook copies over deploymentclient
+
+- name: copy deploymentclient app
+  
+  tags:
+   - install
+  copy: src=/opt/ansible/playbooks/roles/splunkinstall/tasks/tj_all_deploymentclient dest=/opt/splunk/etc/apps/ owner=splunk  mode=755
+  
+
